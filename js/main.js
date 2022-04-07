@@ -52,7 +52,6 @@ const LOGS = {
   draw: 'Ничья - это тоже победа!'
 };
 
-
 const player1 = {
   player: 1,
   name:'Scorpion',
@@ -90,17 +89,17 @@ function createElement(tag, className) {
   return $tag;
 }
 
-function createPlayer(playerObj){
-  const $player = createElement('div', 'player'+playerObj.player),
+function createPlayer({ player, hp, name, img}){
+  const $player = createElement('div', `player${player}`),
         $progressbar = createElement('div', 'progressbar'),
         $character = createElement('div', 'character'),
         $life = createElement('div', 'life'),
         $name = createElement('div', 'name'),
         $img = createElement('img'); 
 
-  $life.style.width = playerObj.hp + '%';
-  $name.innerText = playerObj.name;
-  $img.src = playerObj.img;
+  $life.style.width = hp + '%';
+  $name.innerText = name;
+  $img.src = img;
 
   $progressbar.appendChild($name);
   $progressbar.appendChild($life);
@@ -114,7 +113,7 @@ function createPlayer(playerObj){
 }
 
 function elHP(){
-  return document.querySelector('.player'+ this.player +' .life');
+  return document.querySelector(`.player${this.player}  .life`);
 }
 
 function changeHP(randomNumber) {
@@ -157,9 +156,6 @@ $reloadButton.addEventListener('click', function(){
 $reloadButtonDiv.appendChild($reloadButton);
 $arenas.appendChild($reloadButtonDiv);
 }
-
-
-
 
 function enemyAttack() {
   const hit = ATTACK[getRandom(3)-1];
@@ -255,12 +251,12 @@ function getTextLog(type, playerName1, playerName2){
 }}
 
 
-function generateLogs(type, player1 = {}, player2 ={}, valueAttack){
+function generateLogs(type, { name } = {}, {name: playerName2, hp } = {}, valueAttack){
   
-  let text = getTextLog(type, player1.name, player2.name);
+  let text = getTextLog(type, name, playerName2);
   switch(type) {
     case 'hit':
-      text = `${getTime()} ${text} -${valueAttack} [${player2.hp}/100]`;
+      text = `${getTime()} ${text} -${valueAttack} [${hp}/100]`;
       break;
     case 'defence':
     case 'end':
@@ -277,21 +273,21 @@ function generateLogs(type, player1 = {}, player2 ={}, valueAttack){
 
 $formFight.addEventListener('submit', function(e) {
   e.preventDefault();
-  const enemy = enemyAttack();
-  const player = playerAttack();
+  const {hit: hitEnemy, defence: defenceEnemy, value: valueEnemy} = enemyAttack();
+  const {hit, defence, value} = playerAttack();
 
-  if (player.defence !== enemy.hit) {
-    player1.changeHP(enemy.value);
+  if (defence !== hitEnemy) {
+    player1.changeHP(valueEnemy);
     player1.renderHP();
-    generateLogs('hit', player2, player1, enemy.value);
+    generateLogs('hit', player2, player1, valueEnemy);
   }else{
     generateLogs('defence', player2, player1);
   }
 
-  if (enemy.defence !== player.hit) {
-    player2.changeHP(player.value);
+  if (defenceEnemy !== hit) {
+    player2.changeHP(value);
     player2.renderHP();
-    generateLogs('hit', player1, player2, player.value);
+    generateLogs('hit', player1, player2, value);
   }else{
     generateLogs('defence', player1, player2);
   }
